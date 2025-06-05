@@ -12,18 +12,23 @@ const WeatherDisplay = () => {
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [input, setInput] = useState("");
   const [location, setLocation] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleSearch = async () => {
     setWeatherData(null);
+    setLoading(true);
 
     try {
       const geo = await geocodeCity(input);
       setLocation(geo.name);
       const weather = await fetchWeather(geo.lat, geo.lon);
       setWeatherData(weather.current_weather);
+      setLoading(false);
+      setInput("");
     } catch {
       console.log("Error fetching weather data.");
       setWeatherData(null);
+      setLoading(false);
     }
   };
 
@@ -61,6 +66,7 @@ const WeatherDisplay = () => {
       >
         Search
       </button>
+      {loading && <p>Loading...</p>}
       {weatherData && (
         <div>
           <h2>{location}</h2>
