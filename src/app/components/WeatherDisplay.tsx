@@ -1,11 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { fetchWeather } from "../utils/fetchWeather";
 import { geocodeCity } from "../utils/geocodeCity";
 
 type WeatherData = {
-  temperature: number;
+  current_weather: {
+    temperature: number;
+  };
+  daily: {
+    time: string[];
+    temperature_2m_max: number[];
+    temperature_2m_min: number[];
+  };
 };
 
 const WeatherDisplay = () => {
@@ -22,7 +29,7 @@ const WeatherDisplay = () => {
       const geo = await geocodeCity(input);
       setLocation(geo.name);
       const weather = await fetchWeather(geo.lat, geo.lon);
-      setWeatherData(weather.current_weather);
+      setWeatherData(weather);
       setLoading(false);
       setInput("");
     } catch {
@@ -31,10 +38,6 @@ const WeatherDisplay = () => {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    console.log(weatherData);
-  }, [weatherData]);
 
   return (
     <div
@@ -69,8 +72,19 @@ const WeatherDisplay = () => {
       {loading && <p>Loading...</p>}
       {weatherData && (
         <div>
-          <h2>{location}</h2>
-          <p>Temperature: {weatherData.temperature}°C</p>
+          <strong>
+            <h2>{location}</h2>
+          </strong>
+          <p>Temperature: {weatherData.current_weather.temperature}°C</p>
+          <ul>
+            {weatherData.daily.time.map((date, index) => (
+              <li key={date}>
+                <strong>{date}</strong> - Max:{" "}
+                {weatherData.daily.temperature_2m_max[index]}°C, Min:{" "}
+                {weatherData.daily.temperature_2m_min[index]}°C
+              </li>
+            ))}
+          </ul>
         </div>
       )}
     </div>
